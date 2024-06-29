@@ -18,6 +18,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/users', userRouter);
+app.use('/api/preferences', preferenceRouter);
 
 app.listen(port, () => {
     console.log(`App is listening on port ${port}`);
