@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 8080;
 
+const { userRouter } = require('./routers/userRouter');
+const { preferenceRouter } = require('./routers/preferenceRouter');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -13,6 +16,8 @@ app.use((req, res, next) => {
     res.set('Content-Type', 'application/json');
     next();
 });
+
+app.use('/api/users', userRouter);
 
 app.listen(port, () => {
     console.log(`App is listening on port ${port}`);
