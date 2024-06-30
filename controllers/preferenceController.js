@@ -24,6 +24,11 @@ const preferenceController = {
                 res.status(404).json({ error: 'User not found' });
                 return;
             }
+            const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences WHERE user_id = ?`, [req.body.user_id]);
+            if (preferences.length > 0) {
+                res.status(400).json({ error: 'User already has a preference' });
+                return;
+            }
             const [result] = await connection.execute(`INSERT INTO ${TABLE_NAME}_preferences (user_id, startDate, endDate, destination, vacationType) VALUES (?,?,?,?,?)`,[req.body.user_id, req.body.startDate, req.body.endDate, req.body.destination, req.body.vacationType]);
             const [preference] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences`);
             res.status(201).json(preference);
@@ -63,8 +68,10 @@ const preferenceController = {
         } finally {
             if (connection) connection.end();
         }
-    }
+    },
 };
+
+
 
 
 module.exports = { preferenceController };
