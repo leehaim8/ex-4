@@ -17,16 +17,27 @@ const userController = {
     },
     async addUser(req, res) {
         let connection;
-        try {
-            connection = await dbConnection.createConnection();
-            const [result] = await connection.execute(`INSERT INTO ${TABLE_NAME}_users (userName, userPassword, userAccessCode) VALUES (?, ?, ?)`, [req.body.userName, req.body.userPassword, req.body.userAccessCode]);
-            const [user] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_use WHERE id = ?`, [result.insertId]);
-            res.json(user[0]);
-        } catch (error) {
-            res.status(500).json({ error: 'Error adding user' });
-        } finally {
-            if (connection) connection.end();
+    try {
+        connection = await dbConnection.createConnection();
+        let userAccessCode = 111;
+        let accessCodeExists = true;
+        while (accessCodeExists) {
+            const [existingUser] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users WHERE userAccessCode = ?`, [userAccessCode]);
+            if (existingUser.length > 0) {
+                userAccessCode++;
+            } else {
+                accessCodeExists = false;
+            }
         }
+        const [result] = await connection.execute(`INSERT INTO ${TABLE_NAME}_users (userName, userPassword, userAccessCode) VALUES (?, ?, ?)`,[req.body.userName, req.body.userPassword, userAccessCode]);
+        const [user] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users WHERE id = ?`,[result.insertId]);
+        res.json(user[0]);
+    } catch (error) {
+        console.error('Error adding user:', error);
+        res.status(500).json({ error: 'Error adding user' });
+    } finally {
+        if (connection) connection.end();
+    }
     }
 };
 
