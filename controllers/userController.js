@@ -19,6 +19,15 @@ const userController = {
         let connection;
     try {
         connection = await dbConnection.createConnection();
+        if (!req.body.userName || !req.body.userPassword) {
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
+        }
+        const [existingUser] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users WHERE userName = ?`, [req.body.userName]);
+        if (existingUser.length > 0) {
+            res.status(400).json({ error: 'User already exists' });
+            return;
+        }
         let userAccessCode = 111;
         let accessCodeExists = true;
         while (accessCodeExists) {
