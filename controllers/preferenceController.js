@@ -1,4 +1,6 @@
 const { dbConnection } = require('../db_connection');
+const { countries } = require('../data/countries.json');
+const { vacationTypes } = require('../data/vacationTypes.json');
 
 const TABLE_NAME = "tbl_37";
 
@@ -19,6 +21,10 @@ const preferenceController = {
         let connection;
         try {
             connection = await dbConnection.createConnection();
+            if (!req.body.user_id || !req.body.startDate || !req.body.endDate || !req.body.destination || !req.body.vacationType) {
+                res.status(400).json({ error: 'Missing required fields' });
+                return;
+            }
             const [user] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users WHERE id = ?`,[req.body.user_id]);
             if (user.length === 0) {
                 res.status(404).json({ error: 'User not found' });
@@ -27,6 +33,14 @@ const preferenceController = {
             const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences WHERE user_id = ?`, [req.body.user_id]);
             if (preferences.length > 0) {
                 res.status(400).json({ error: 'User already has a preference' });
+                return;
+            }
+            if (!countries.includes(req.body.destination)) {
+                res.status(400).json({ error: 'Invalid destination' });
+                return;
+            }
+            if (!vacationTypes.includes(req.body.vacationType)) {
+                res.status(400).json({ error: 'Invalid vacation type' });
                 return;
             }
             const [result] = await connection.execute(`INSERT INTO ${TABLE_NAME}_preferences (user_id, startDate, endDate, destination, vacationType) VALUES (?,?,?,?,?)`,[req.body.user_id, req.body.startDate, req.body.endDate, req.body.destination, req.body.vacationType]);
@@ -43,6 +57,10 @@ const preferenceController = {
         let connection;
         try {
             connection = await dbConnection.createConnection();
+            if (!req.body.startDate || !req.body.endDate || !req.body.destination || !req.body.vacationType) {
+                res.status(400).json({ error: 'Missing required fields' });
+                return;
+            }
             const [users] = await connection.execute(`SELECT id FROM ${TABLE_NAME}_users WHERE userAccessCode = ?`, [req.params.accessCode]);
             if (users.length === 0) {
                 res.status(404).json({ error: 'User not found' });
@@ -68,10 +86,7 @@ const preferenceController = {
         } finally {
             if (connection) connection.end();
         }
-    },
+    }
 };
-
-
-
 
 module.exports = { preferenceController };
