@@ -43,6 +43,13 @@ const preferenceController = {
                 res.status(400).json({ error: 'Invalid vacation type' });
                 return;
             }
+            const startDate = new Date(req.body.startDate);
+            const endDate = new Date(req.body.endDate);
+            const dateDiff = (endDate - startDate) / (1000 * 60 * 60 * 24);
+            if (startDate > endDate || dateDiff > 7) {
+                res.status(400).json({ error: 'Invalid date range, must be up to 7 days and end date should be after start date' });
+                return;
+            }
             const [result] = await connection.execute(`INSERT INTO ${TABLE_NAME}_preferences (user_id, startDate, endDate, destination, vacationType) VALUES (?,?,?,?,?)`,[req.body.user_id, req.body.startDate, req.body.endDate, req.body.destination, req.body.vacationType]);
             const [preference] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences`);
             res.status(201).json(preference);
@@ -70,6 +77,21 @@ const preferenceController = {
             const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences WHERE user_id = ?`, [userId]);
             if (preferences.length === 0) {
                 res.status(404).json({ error: 'Preference not found' });
+                return;
+            }
+            if (!countries.includes(req.body.destination)) {
+                res.status(400).json({ error: 'Invalid destination' });
+                return;
+            }
+            if (!vacationTypes.includes(req.body.vacationType)) {
+                res.status(400).json({ error: 'Invalid vacation type' });
+                return;
+            }
+            const startDate = new Date(req.body.startDate);
+            const endDate = new Date(req.body.endDate);
+            const dateDiff = (endDate - startDate) / (1000 * 60 * 60 * 24);
+            if (startDate > endDate || dateDiff > 7) {
+                res.status(400).json({ error: 'Invalid date range, must be up to 7 days and end date should be after start date' });
                 return;
             }
             const [result] = await connection.execute(`UPDATE ${TABLE_NAME}_preferences SET startDate = ?, endDate = ?, destination = ?, vacationType = ? WHERE user_id = ?`, [req.body.startDate, req.body.endDate, req.body.destination, req.body.vacationType, userId]);
