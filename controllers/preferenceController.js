@@ -134,7 +134,7 @@ const preferenceController = {
     },
     async getVacationResults(req, res) {
         let connection;
-    try {
+        try {
         connection = await dbConnection.createConnection();
         const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences`);
         if (preferences.length === 0) {
