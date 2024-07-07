@@ -44,18 +44,13 @@ const preferenceController = {
         let connection;
         try {
             connection = await dbConnection.createConnection();
-            const [users] = await connection.execute(`SELECT id FROM ${TABLE_NAME}_users WHERE userAccessCode = ?`, [req.params.accessCode]);
+            const [users] = await connection.execute(`SELECT id FROM ${TABLE_NAME}_users WHERE userAccessCode = ?`, [req.body.accessCode]);
             if (users.length === 0) {
                 res.status(404).json({ error: 'User with this access code not found' });
                 return;
             }
             if (!req.body.user_id || !req.body.startDate || !req.body.endDate || !req.body.destination || !req.body.vacationType) {
                 res.status(400).json({ error: 'Missing required fields' });
-                return;
-            }
-            const [user] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users WHERE id = ?`,[req.body.user_id]);
-            if (user.length === 0) {
-                res.status(404).json({ error: 'User not found' });
                 return;
             }
             const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences WHERE user_id = ?`, [req.body.user_id]);
@@ -96,7 +91,7 @@ const preferenceController = {
                 res.status(400).json({ error: 'Missing required fields' });
                 return;
             }
-            const [users] = await connection.execute(`SELECT id FROM ${TABLE_NAME}_users WHERE userAccessCode = ?`, [req.params.accessCode]);
+            const [users] = await connection.execute(`SELECT id FROM ${TABLE_NAME}_users WHERE userAccessCode = ?`, [req.body.accessCode]);
             if (users.length === 0) {
                 res.status(404).json({ error: 'User not found' });
                 return;
