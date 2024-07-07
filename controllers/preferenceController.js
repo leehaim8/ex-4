@@ -44,6 +44,11 @@ const preferenceController = {
         let connection;
         try {
             connection = await dbConnection.createConnection();
+            const [users] = await connection.execute(`SELECT id FROM ${TABLE_NAME}_users WHERE userAccessCode = ?`, [req.params.accessCode]);
+            if (users.length === 0) {
+                res.status(404).json({ error: 'User with this access code not found' });
+                return;
+            }
             if (!req.body.user_id || !req.body.startDate || !req.body.endDate || !req.body.destination || !req.body.vacationType) {
                 res.status(400).json({ error: 'Missing required fields' });
                 return;
