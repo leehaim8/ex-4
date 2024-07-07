@@ -139,10 +139,6 @@ const preferenceController = {
         try {
         connection = await dbConnection.createConnection();
         const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences`);
-        if (preferences.length === 0) {
-            res.status(404).json({ error: 'No preferences found' });
-            return;
-        }
         if (preferences.length < 5) {
             res.status(404).json({ error: 'Not all users have submitted their preferences' });
             return;
