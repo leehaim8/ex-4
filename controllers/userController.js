@@ -19,6 +19,11 @@ const userController = {
         let connection;
     try {
         connection = await dbConnection.createConnection();
+        const [rows] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users`);
+        if (rows.length >= 5) {
+            res.status(400).json({ error: 'Max users reached' });
+            return;
+        }
         if (!req.body.userName || !req.body.userPassword) {
             res.status(400).json({ error: 'Missing required fields' });
             return;
