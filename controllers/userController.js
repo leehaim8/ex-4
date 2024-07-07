@@ -3,21 +3,13 @@ const { dbConnection } = require('../db_connection');
 const TABLE_NAME = "tbl_37";
 
 const userController = {
-    async getUsers(req, res) {
-        let connection;
-        try {
-            connection = await dbConnection.createConnection();
-            const [rows] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users`);
-            res.json(rows);
-        } catch (error) {
-            res.status(500).json({ error: 'Error fetching users' });
-        } finally {
-            if (connection) connection.end();
-        }
-    },
     async addUser(req, res) {
         let connection;
     try {
+        if (!req.body.userName || !req.body.userPassword) {
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
+        }
         connection = await dbConnection.createConnection();
         const [rows] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_users`);
         if (rows.length >= 5) {
