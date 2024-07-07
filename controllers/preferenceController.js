@@ -49,11 +49,12 @@ const preferenceController = {
                 res.status(404).json({ error: 'User with this access code not found' });
                 return;
             }
-            if (!req.body.user_id || !req.body.startDate || !req.body.endDate || !req.body.destination || !req.body.vacationType) {
+            const userId = users[0].id;
+            if (!req.body.startDate || !req.body.endDate || !req.body.destination || !req.body.vacationType) {
                 res.status(400).json({ error: 'Missing required fields' });
                 return;
             }
-            const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences WHERE user_id = ?`, [req.body.user_id]);
+            const [preferences] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences WHERE user_id = ?`, [userId]);
             if (preferences.length > 0) {
                 res.status(400).json({ error: 'User already has a preference' });
                 return;
@@ -73,7 +74,7 @@ const preferenceController = {
                 res.status(400).json({ error: 'Invalid date range, must be up to 7 days and end date should be after start date' });
                 return;
             }
-            const [result] = await connection.execute(`INSERT INTO ${TABLE_NAME}_preferences (user_id, startDate, endDate, destination, vacationType) VALUES (?,?,?,?,?)`,[req.body.user_id, req.body.startDate, req.body.endDate, req.body.destination, req.body.vacationType]);
+            const [result] = await connection.execute(`INSERT INTO ${TABLE_NAME}_preferences (user_id, startDate, endDate, destination, vacationType) VALUES (?,?,?,?,?)`,[userId, req.body.startDate, req.body.endDate, req.body.destination, req.body.vacationType]);
             const [preference] = await connection.execute(`SELECT * FROM ${TABLE_NAME}_preferences`);
             res.status(201).json(preference);
         } catch (error) {
